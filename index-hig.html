@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novus API for Make.com</title>
+    <meta name="description" content="Human-centered API documentation for integrating Novus API with Make.com workflows">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <link rel="stylesheet" href="styles-hig.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle navigation menu">☰</button>
+            <a href="#" class="logo">
+                <div class="logo-icon">N</div>
+                <div>Novus API</div>
+            </a>
+            <nav class="header-nav" role="navigation">
+                <a href="#overview" class="nav-link active">Overview</a>
+                <a href="guide-hig.html" class="nav-link">Integration Guide</a>
+                <a href="api-reference-hig.html" class="nav-link">API Reference</a>
+            </nav>
+            <a href="guide-hig.html" class="cta-button">Get Started</a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar" id="sidebar" role="complementary">
+            <div class="sidebar-content">
+                <div class="nav-section">
+                    <div class="nav-section-title">Getting Started</div>
+                    <a href="#overview" class="nav-item active">Overview</a>
+                    <a href="#quick-start" class="nav-item">Quick Start</a>
+                    <a href="#prerequisites" class="nav-item">Prerequisites</a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Integration</div>
+                    <a href="guide-hig.html" class="nav-item">Make.com Setup</a>
+                    <a href="guide-hig.html#token-management" class="nav-item sub-item">Token Management</a>
+                    <a href="guide-hig.html#http-modules" class="nav-item sub-item">HTTP Modules</a>
+                    <a href="guide-hig.html#error-handling" class="nav-item sub-item">Error Handling</a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">API Reference</div>
+                    <a href="api-reference-hig.html" class="nav-item">Authentication</a>
+                    <a href="api-reference-hig.html#endpoints" class="nav-item">Endpoints</a>
+                    <a href="api-reference-hig.html#token" class="nav-item sub-item">POST /Token</a>
+                    <a href="api-reference-hig.html#member-info" class="nav-item sub-item">POST /GetMemberInfo</a>
+                    <a href="api-reference-hig.html#responses" class="nav-item">Responses</a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content" role="main">
+            <div class="content-wrapper">
+                <section class="hero animate-in">
+                    <h1>Novus API for Make.com</h1>
+                    <p>Effortless integration of WAEPA member information into your workflows. Clear documentation that gets you building faster.</p>
+                    <div class="hero-buttons">
+                        <a href="guide-hig.html" class="button button-primary">
+                            <span>Get Started</span>
+                            <span>→</span>
+                        </a>
+                        <a href="api-reference-hig.html" class="button button-secondary">
+                            <span>📖</span>
+                            <span>API Reference</span>
+                        </a>
+                    </div>
+                </section>
+
+                <section class="features animate-in">
+                    <a href="guide-hig.html" class="feature-card">
+                        <div class="feature-icon">🚀</div>
+                        <h3>Integration Guide</h3>
+                        <p>Step-by-step instructions that respect your time. Configure Make.com HTTP modules with confidence.</p>
+                    </a>
+
+                    <a href="api-reference-hig.html" class="feature-card">
+                        <div class="feature-icon">📚</div>
+                        <h3>API Reference</h3>
+                        <p>Complete, accurate documentation. Every endpoint, parameter, and response clearly explained.</p>
+                    </a>
+
+                    <a href="#examples" class="feature-card">
+                        <div class="feature-icon">💡</div>
+                        <h3>Ready-to-Use Examples</h3>
+                        <p>Copy-paste configurations and workflow templates. Get up and running in minutes, not hours.</p>
+                    </a>
+                </section>
+
+                <section id="quick-start" class="quick-start animate-in">
+                    <h2>Quick Start</h2>
+                    <p>Four clear steps to integrate the Novus API with your Make.com workflows.</p>
+                    
+                    <div class="quick-start-steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Get Access</h4>
+                                <p>Request your API credentials and IP whitelisting from your administrator.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Configure HTTP Modules</h4>
+                                <p>Set up token retrieval and member information requests in Make.com.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Handle Token Refresh</h4>
+                                <p>Implement smart caching for the 5-minute token expiration.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>Process Responses</h4>
+                                <p>Parse member data and integrate into your workflows seamlessly.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="prerequisites" class="api-section animate-in">
+                    <h2>Prerequisites</h2>
+                    <p>Everything you need before you begin:</p>
+                    
+                    <div class="code-example">
+                        <div class="code-header">
+                            <span>Requirements Checklist</span>
+                        </div>
+                        <div class="code-content">
+                            <pre><code>✅ Make.com account with HTTP module access
+✅ Novus API credentials (Username and Password)
+✅ Whitelisted IP address for API access
+✅ Understanding of JSON and REST APIs
+✅ Access to QA and/or Production environments</code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="overview" class="api-section animate-in">
+                    <h2>How It Works</h2>
+                    <p>The Novus API uses a simple two-step authentication process designed for Make.com integration.</p>
+
+                    <div class="info-box info-box-info">
+                        <div class="info-icon">💡</div>
+                        <div class="info-content">
+                            <strong>Key Insight:</strong> Tokens expire in 5 minutes to ensure security. Our documentation shows you exactly how to handle this gracefully in your workflows.
+                        </div>
+                    </div>
+
+                    <h3>Authentication Flow</h3>
+                    <div class="code-example">
+                        <div class="code-header">
+                            <span>Simple Two-Step Process</span>
+                        </div>
+                        <div class="code-content">
+                            <pre><code>1. Request Token
+   POST /Token (with credentials in headers)
+   → Returns: Authentication token
+
+2. Get Member Info
+   POST /GetMemberInfo (with token + member data)
+   → Returns: Complete member information</code></pre>
+                        </div>
+                    </div>
+
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li><strong>Secure Authentication:</strong> Token-based access with automatic expiration</li>
+                        <li><strong>Complete Member Data:</strong> Demographics, policies, and contact information</li>
+                        <li><strong>IP Security:</strong> Whitelisted access for enhanced protection</li>
+                        <li><strong>Environment Support:</strong> Separate QA and Production endpoints</li>
+                    </ul>
+                </section>
+
+                <section id="examples" class="api-section animate-in">
+                    <h2>Ready-to-Use Examples</h2>
+                    <p>Start with these proven configurations:</p>
+
+                    <div class="environment-cards">
+                        <div class="environment-card">
+                            <div class="env-header">
+                                <h3>Basic Member Lookup</h3>
+                                <span class="status-badge status-stable">Ready</span>
+                            </div>
+                            <div class="env-content">
+                                <p>Simple workflow to retrieve member information using membership ID and basic demographics.</p>
+                                <a href="guide-hig.html#member-request" style="color: var(--color-primary); text-decoration: none; font-weight: 500;">View Setup Guide →</a>
+                            </div>
+                        </div>
+
+                        <div class="environment-card">
+                            <div class="env-header">
+                                <h3>Batch Processing</h3>
+                                <span class="status-badge status-stable">Ready</span>
+                            </div>
+                            <div class="env-content">
+                                <p>Process multiple members efficiently with smart token caching and error handling.</p>
+                                <a href="guide-hig.html#token-management" style="color: var(--color-primary); text-decoration: none; font-weight: 500;">View Strategy →</a>
+                            </div>
+                        </div>
+
+                        <div class="environment-card">
+                            <div class="env-header">
+                                <h3>Error Recovery</h3>
+                                <span class="status-badge status-stable">Ready</span>
+                            </div>
+                            <div class="env-content">
+                                <p>Robust workflows that handle token expiration, network issues, and empty responses gracefully.</p>
+                                <a href="guide-hig.html#error-handling" style="color: var(--color-primary); text-decoration: none; font-weight: 500;">View Patterns →</a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="api-section animate-in">
+                    <h2>Support</h2>
+                    <p>Get help when you need it:</p>
+                    
+                    <div class="features">
+                        <div class="feature-card">
+                            <div class="feature-icon">🛠️</div>
+                            <h3>Technical Support</h3>
+                            <p>Contact Novus API support for credentials, IP whitelisting, and API-specific questions.</p>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="feature-icon">📖</div>
+                            <h3>Make.com Resources</h3>
+                            <p>Refer to Make.com's HTTP module documentation for platform-specific guidance.</p>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="feature-icon">🔍</div>
+                            <h3>Troubleshooting</h3>
+                            <p>Step-by-step solutions for common integration challenges and error scenarios.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>

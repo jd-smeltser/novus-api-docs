@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Reference - Novus API</title>
+    <meta name="description" content="Complete API reference for Novus API endpoints, authentication, and data models">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <link rel="stylesheet" href="styles-hig.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle navigation menu">☰</button>
+            <a href="index-hig.html" class="logo">
+                <div class="logo-icon">N</div>
+                <div>Novus API</div>
+            </a>
+            <nav class="header-nav" role="navigation">
+                <a href="index-hig.html" class="nav-link">Overview</a>
+                <a href="guide-hig.html" class="nav-link">Integration Guide</a>
+                <a href="api-reference-hig.html" class="nav-link active">API Reference</a>
+            </nav>
+            <a href="guide-hig.html" class="cta-button">Get Started</a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar" id="sidebar" role="complementary">
+            <div class="sidebar-content">
+                <div class="nav-section">
+                    <div class="nav-section-title">Authentication</div>
+                    <a href="#authentication" class="nav-item active">Overview</a>
+                    <a href="#base-urls" class="nav-item">Base URLs</a>
+                    <a href="#rate-limits" class="nav-item">Limits & Security</a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Endpoints</div>
+                    <a href="#token-endpoint" class="nav-item">POST /Token</a>
+                    <a href="#member-info-endpoint" class="nav-item">POST /GetMemberInfo</a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Data Models</div>
+                    <a href="#member-response" class="nav-item">Member Response</a>
+                    <a href="#demographics" class="nav-item sub-item">Demographics</a>
+                    <a href="#products" class="nav-item sub-item">Products</a>
+                    <a href="#address" class="nav-item sub-item">Address</a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Error Handling</div>
+                    <a href="#error-codes" class="nav-item">Status Codes</a>
+                    <a href="#error-responses" class="nav-item">Error Responses</a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content" role="main">
+            <div class="content-wrapper">
+                <header class="page-header">
+                    <h1>API Reference</h1>
+                    <p>Complete, accurate reference for all Novus API endpoints. Every parameter, response field, and error code clearly documented.</p>
+                </header>
+
+                <section id="authentication" class="api-section">
+                    <h2>Authentication</h2>
+                    <p>The Novus API uses custom header authentication with temporary tokens for secure access.</p>
+
+                    <div class="info-box info-box-warning">
+                        <div class="info-icon">⏱️</div>
+                        <div class="info-content">
+                            <strong>Token Expiration:</strong> Authentication tokens are valid for exactly 5 minutes. Build your workflows with this constraint in mind.
+                        </div>
+                    </div>
+
+                    <h3>Authentication Flow</h3>
+                    <ol style="margin: var(--space-4) 0; padding-left: var(--space-6); color: var(--color-label-secondary);">
+                        <li><strong>Request Token:</strong> Send credentials via headers to /Token endpoint</li>
+                        <li><strong>Extract Token:</strong> Parse the token from the JSON response</li>
+                        <li><strong>Use Token:</strong> Include token in headers for API requests</li>
+                        <li><strong>Monitor Expiration:</strong> Refresh token before 5-minute limit</li>
+                    </ol>
+
+                    <h3>Header Authentication</h3>
+                    <div class="endpoint-section">
+                        <div class="endpoint-header">
+                            <span class="method method-get">Headers</span>
+                            <span class="endpoint-path">Required for All Requests</span>
+                        </div>
+                        
+                        <div class="tab-container">
+                            <div class="tab-buttons">
+                                <button class="tab-button active" onclick="showTab('token-headers')">Token Request</button>
+                                <button class="tab-button" onclick="showTab('api-headers')">API Requests</button>
+                            </div>
+
+                            <div class="tab-content">
+                                <div id="token-headers" class="tab-pane active">
+                                    <h4>Token Request Headers</h4>
+                                    <table class="params-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Header</th>
+                                                <th>Type</th>
+                                                <th>Required</th>
+                                                <th>Description</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><code>UserName</code></td>
+                                                <td>string</td>
+                                                <td><span class="required">Required</span></td>
+                                                <td>Your assigned Novus API username</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code>Password</code></td>
+                                                <td>string</td>
+                                                <td><span class="required">Required</span></td>
+                                                <td>Your assigned Novus API password</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div id="api-headers" class="tab-pane">
+                                    <h4>All API Request Headers</h4>
+                                    <table class="params-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Header</th>
+                                                <th>Type</th>
+                                                <th>Required</th>
+                                                <th>Description</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><code>UserName</code></td>
+                                                <td>string</td>
+                                                <td><span class="required">Required</span></td>
+                                                <td>Your assigned Novus API username</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code>Password</code></td>
+                                                <td>string</td>
+                                                <td><span class="required">Required</span></td>
+                                                <td>Your assigned Novus API password</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code>Token</code></td>
+                                                <td>string</td>
+                                                <td><span class="required">Required</span></td>
+                                                <td>Valid authentication token from /Token endpoint</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="base-urls" class="api-section">
+                    <h2>Base URLs</h2>
+                    <p>The API is available in both QA and Production environments with specific URL patterns.</p>
+
+                    <div class="environment-cards">
+                        <div class="environment-card">
+                            <div class="env-header">
+                                <h3>QA Environment</h3>
+                                <span class="status-badge status-beta">Testing</span>
+                            </div>
+                            <div class="env-content">
+                                <p><strong>Base URL:</strong> <code>https://[CLIENT_URL]/[API_PATH]/WAEPANYL</code></p>
+                                <p><strong>Token Endpoint:</strong> <code>/WAEPANYL/Token</code></p>
+                                <p><strong>Member Info:</strong> <code>/WAEPANYL/GetMemberInfo</code></p>
+                                <p>Use for development, testing, and integration validation.</p>
+                            </div>
+                        </div>
+
+                        <div class="environment-card">
+                            <div class="env-header">
+                                <h3>Production Environment</h3>
+                                <span class="status-badge status-stable">Live</span>
+                            </div>
+                            <div class="env-content">
+                                <p><strong>Base URL:</strong> <code>https://[CLIENT_URL]/[API_PATH]</code></p>
+                                <p><strong>Token Endpoint:</strong> <code>/WAEPANYL/Token</code></p>
+                                <p><strong>Member Info:</strong> <code>/GetMemberInfo</code></p>
+                                
+                                <div class="info-box info-box-warning">
+                                    <div class="info-icon">⚠️</div>
+                                    <div class="info-content">
+                                        <strong>Key Difference:</strong> Production GetMemberInfo omits <code>/WAEPANYL/</code> from the path.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="rate-limits" class="api-section">
+                    <h2>Security & Limits</h2>
+                    
+                    <div class="info-box info-box-error">
+                        <div class="info-icon">🔒</div>
+                        <div class="info-content">
+                            <strong>IP Restriction:</strong> All API access is restricted by IP address. Your IP must be whitelisted before you can make any requests.
+                        </div>
+                    </div>
+
+                    <h3>Access Requirements</h3>
+                    <ul>
+                        <li><strong>IP Whitelisting:</strong> Required for all environments and endpoints</li>
+                        <li><strong>Token Expiration:</strong> 5 minutes from generation time</li>
+                        <li><strong>HTTPS Only:</strong> All requests must use secure HTTPS protocol</li>
+                        <li><strong>Header Authentication:</strong> Custom headers required for all requests</li>
+                    </ul>
+
+                    <h3>Rate Limits</h3>
+                    <p>Contact your API administrator for specific rate limiting information for your implementation.</p>
+                </section>
+
+                <section id="token-endpoint" class="api-section">
+                    <h2>POST /Token</h2>
+                    <p>Generate an authentication token for subsequent API requests.</p>
+
+                    <div class="endpoint-section">
+                        <div class="endpoint-header">
+                            <span class="method method-post">POST</span>
+                            <span class="endpoint-path">/WAEPANYL/Token</span>
+                        </div>
+
+                        <div class="tab-container">
+                            <div class="tab-buttons">
+                                <button class="tab-button active" onclick="showTab('token-request')">Request</button>
+                                <button class="tab-button" onclick="showTab('token-response')">Response</button>
+                                <button class="tab-button" onclick="showTab('token-examples')">Examples</button>
+                            </div>
+
+                            <div class="tab-content">
+                                <div id="token-request" class="tab-pane active">
+                                    <h4>Request Format</h4>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>Headers</span>
+                                            <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                                        </div>
+                                        <div class="code-content">
+                                            <pre><code>UserName: [YOUR_USERNAME]
+Password: [YOUR_PASSWORD]
+Content-Type: application/json</code></pre>
+                                        </div>
+                                    </div>
+
+                                    <h4>Request Body</h4>
+                                    <p>No request body is required for the token endpoint.</p>
+                                </div>
+
+                                <div id="token-response" class="tab-pane">
+                                    <h4>Successful Response (200 OK)</h4>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>JSON Response</span>
+                                            <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                                        </div>
+                                        <div class="code-content">
+                                            <pre><code class="language-json">{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+  "expires_in": 300,
+  "token_type": "Bearer"
+}</code></pre>
+                                        </div>
+                                    </div>
+
+                                    <h4>Response Fields</h4>
+                                    <table class="params-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Field</th>
+                                                <th>Type</th>
+                                                <th>Description</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><code>token</code></td>
+                                                <td>string</td>
+                                                <td>JWT authentication token for API requests</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code>expires_in</code></td>
+                                                <td>integer</td>
+                                                <td>Token lifetime in seconds (always 300 = 5 minutes)</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code>token_type</code></td>
+                                                <td>string</td>
+                                                <td>Token type identifier (always "Bearer")</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div id="token-examples" class="tab-pane">
+                                    <h4>cURL Example</h4>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>Both Environments</span>
+                                            <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                                        </div>
+                                        <div class="code-content">
+                                            <pre><code class="language-bash">curl -X POST "https://[CLIENT_URL]/[API_PATH]/WAEPANYL/Token" \
+  -H "UserName: [YOUR_USERNAME]" \
+  -H "Password: [YOUR_PASSWORD]" \
+  -H "Content-Type: application/json"</code></pre>
+                                        </div>
+                                    </div>
+
+                                    <h4>Make.com HTTP Module</h4>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>Configuration Summary</span>
+                                        </div>
+                                        <div class="code-content">
+                                            <pre><code>Module: HTTP > Make a request
+Method: POST
+URL: https://[CLIENT_URL]/[API_PATH]/WAEPANYL/Token
+Headers: UserName, Password, Content-Type
+Body: Empty (Raw)</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="member-info-endpoint" class="api-section">
+                    <h2>POST /GetMemberInfo</h2>
+                    <p>Retrieve comprehensive member information using member identifiers and authentication token.</p>
+
+                    <div class="endpoint-section">
+                        <div class="endpoint-header">
+                            <span class="method method-post">POST</span>
+                            <span class="endpoint-path">/WAEPANYL/GetMemberInfo</span>
+                            <span style="font-size: var(--font-caption-1); color: var(--color-label-tertiary);">QA Environment</span>
+                        </div>
+
+                        <div class="endpoint-section" style="margin-top: var(--space-4);">
+                            <div class="endpoint-header">
+                                <span class="method method-post">POST</span>
+                                <span class="endpoint-path">/GetMemberInfo</span>
+                                <span style="font-size: var(--font-caption-1); color: var(--color-label-tertiary);">Production Environment</span>
+                            </div>
+                        </div>
+
+                        <div class="tab-container">
+                            <div class="tab-buttons">
+                                <button class="tab-button active" onclick="showTab('member-request')">Request</button>
+                                <button class="tab-button" onclick="showTab('member-response')">Response</button>
+                                <button class="tab-button" onclick="showTab('member-examples')">Examples</button>
+                            </div>
+
+                            <div class="tab-content">
+                                <div id="member-request" class="tab-pane active">
+                                    <h4>Request Headers</h4>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>Required Headers</span>
+                                            <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                                        </div>
+                                        <div class="code-content">
+                                            <pre><code>UserName: [YOUR_USERNAME]
+Password: [YOUR_PASSWORD]
+Token: [VALID_TOKEN_FROM_PREVIOUS_REQUEST]
+Content-Type: application/json</code></pre>
+                                        </div>
+                                    </div>
+
+                                    <h4>Request Body</h4>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>JSON Request Body</span>
+                                            <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                                        </div>
+                                        <div class="code-content">
+                                            <pre><code class="language-json">{
+  "MembershipID": "123456",
+  "MemberSSN": "123-45-6789",
+  "DateOfBirth": "1990-01-15",
+  "FirstName": "Jane",
+  "LastName": "Doe"
+}</code></pre>
+                                        </div>
+                                    </div>
+
+                                    <h4>Request Parameters</h4>
+                                    <table class="params-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Parameter</th>
+                                                <th>Type</th>
+                                                <th>Required</th>
+                                                <th>Format</th>
+                                                <th>Description</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><code>MembershipID</code></td>
+                                                <td>string</td>
+                                                <td><span class="required">Required</span></td>
+                                                <td>Any</td>
+                                                <td>Member's unique identification number</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code>MemberSSN</code></td>
+                                                <td>string</td>
+                                                <td><span class="required">Required</span></td>
+                                                <td>XXX-XX-XXXX</td>
+                                                <td>Social Security Number with dashes</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code>DateOfBirth</code></td>
+                                                <td>string</td>
+                                                <td><span class="required">Required</span></td>
+                                                <td>YYYY-MM-DD</td>
+                                                <td>Birth date in ISO format</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code>FirstName</code></td>
+                                                <td>string</td>
+                                                <td><span class="required">Required</span></td>
+                                                <td>Any</td>
+                                                <td>Member's first name (exact spelling)</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code>LastName</code></td>
+                                                <td>string</td>
+                                                <td><span class="required">Required</span></td>
+                                                <td>Any</td>
+                                                <td>Member's last name (exact spelling)</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div id="member-response" class="tab-pane">
+                                    <h4>Successful Response (200 OK)</h4>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>Member Found Response</span>
+                                            <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                                        </div>
+                                        <div class="code-content">
+                                            <pre><code class="language-json">[
+  {
+    "coveredPersonType": "Member",
+    "demographics": {
+      "firstName": "Jane",
+      "lastName": "Doe",
+      "dateOfBirth": "1999-03-19T00:00:00",
+      "membershipID": "123456",
+      "title": "",
+      "suffix": "",
+      "middleInitial": "",
+      "emailAddressInsured": "jane.doe@company.com",
+      "maritalStatus": "Single",
+      "height": "",
+      "membershipStatus": "ACTIVE",
+      "primaryPhoneType": null,
+      "primaryPhoneNumber": null,
+      "residentialAddress": {
+        "streetAddressOrPOBox": "123 Main Street",
+        "streetAddress2": "",
+        "city": "PLANO",
+        "stateOfProvince": "TX",
+        "zipCode": "12345"
+      }
+    },
+    "businessAddress": "NO",
+    "Products": [
+      {
+        "carrierPolicyNumber": "G-30280-0",
+        "policyNumber": "GTL-130601-01",
+        "productCode": "GTL",
+        "coverageAmount": "0",
+        "riders": [
+          {
+            "riderName": "CHRONIC ILLNESS RIDER",
+            "riderCode": "CIR",
+            "coverageAmount": "0"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "coveredPersonType": "Spouse",
+    "demographics": null,
+    "businessAddress": null,
+    "Products": null
+  }
+]</code></pre>
+                                        </div>
+                                    </div>
+
+                                    <h4>Empty Response (200 OK)</h4>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>No Member Found</span>
+                                        </div>
+                                        <div class="code-content">
+                                            <pre><code class="language-json">[]</code></pre>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-box info-box-info">
+                                        <div class="info-icon">ℹ️</div>
+                                        <div class="info-content">
+                                            <strong>Empty Response Meaning:</strong> An empty array indicates either no member found or multiple ambiguous matches. This is a normal response pattern.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="member-examples" class="tab-pane">
+                                    <h4>cURL Example</h4>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>Complete Request</span>
+                                            <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                                        </div>
+                                        <div class="code-content">
+                                            <pre><code class="language-bash">curl -X POST "https://[CLIENT_URL]/[API_PATH]/WAEPANYL/GetMemberInfo" \
+  -H "UserName: [YOUR_USERNAME]" \
+  -H "Password: [YOUR_PASSWORD]" \
+  -H "Token: [VALID_TOKEN]" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "MembershipID": "123456",
+    "MemberSSN": "123-45-6789", 
+    "DateOfBirth": "1990-01-15",
+    "FirstName": "Jane",
+    "LastName": "Doe"
+  }'</code></pre>
+                                        </div>
+                                    </div>
+
+                                    <h4>Make.com Configuration</h4>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>HTTP Module Settings</span>
+                                        </div>
+                                        <div class="code-content">
+                                            <pre><code>Module: HTTP > Make a request
+Method: POST
+URL (QA): https://[CLIENT_URL]/[API_PATH]/WAEPANYL/GetMemberInfo
+URL (Prod): https://[CLIENT_URL]/[API_PATH]/GetMemberInfo
+Headers: UserName, Password, Token, Content-Type
+Body Type: Raw (JSON)</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="member-response" class="api-section">
+                    <h2>Data Models</h2>
+                    <p>Detailed specifications for all response data structures.</p>
+
+                    <div id="demographics" class="api-section">
+                        <h3>Demographics Object</h3>
+                        <p>Complete member demographic information when available.</p>
+
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>Example</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>firstName</code></td>
+                                    <td>string</td>
+                                    <td>Member's first name</td>
+                                    <td>"Jane"</td>
+                                </tr>
+                                <tr>
+                                    <td><code>lastName</code></td>
+                                    <td>string</td>
+                                    <td>Member's last name</td>
+                                    <td>"Doe"</td>
+                                </tr>
+                                <tr>
+                                    <td><code>dateOfBirth</code></td>
+                                    <td>string</td>
+                                    <td>ISO 8601 datetime with timezone</td>
+                                    <td>"1999-03-19T00:00:00"</td>
+                                </tr>
+                                <tr>
+                                    <td><code>membershipID</code></td>
+                                    <td>string</td>
+                                    <td>Unique member identifier</td>
+                                    <td>"123456"</td>
+                                </tr>
+                                <tr>
+                                    <td><code>emailAddressInsured</code></td>
+                                    <td>string|null</td>
+                                    <td>Member's email address if available</td>
+                                    <td>"jane.doe@company.com"</td>
+                                </tr>
+                                <tr>
+                                    <td><code>membershipStatus</code></td>
+                                    <td>string</td>
+                                    <td>Current membership status</td>
+                                    <td>"ACTIVE"</td>
+                                </tr>
+                                <tr>
+                                    <td><code>maritalStatus</code></td>
+                                    <td>string</td>
+                                    <td>Member's marital status</td>
+                                    <td>"Single"</td>
+                                </tr>
+                                <tr>
+                                    <td><code>residentialAddress</code></td>
+                                    <td>object</td>
+                                    <td>Address object (see below)</td>
+                                    <td>Address Object</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="address" class="api-section">
+                        <h3>Address Object</h3>
+                        <p>Residential address information structure.</p>
+
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>Example</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>streetAddressOrPOBox</code></td>
+                                    <td>string</td>
+                                    <td>Primary address line</td>
+                                    <td>"123 Main Street"</td>
+                                </tr>
+                                <tr>
+                                    <td><code>streetAddress2</code></td>
+                                    <td>string</td>
+                                    <td>Secondary address line (apartment, suite)</td>
+                                    <td>"Apt 4B"</td>
+                                </tr>
+                                <tr>
+                                    <td><code>city</code></td>
+                                    <td>string</td>
+                                    <td>City name</td>
+                                    <td>"PLANO"</td>
+                                </tr>
+                                <tr>
+                                    <td><code>stateOfProvince</code></td>
+                                    <td>string</td>
+                                    <td>State or province abbreviation</td>
+                                    <td>"TX"</td>
+                                </tr>
+                                <tr>
+                                    <td><code>zipCode</code></td>
+                                    <td>string</td>
+                                    <td>Postal/ZIP code</td>
+                                    <td>"12345"</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="products" class="api-section">
+                        <h3>Products Array</h3>
+                        <p>Policy and coverage information for the member.</p>
+
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>Example</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>carrierPolicyNumber</code></td>
+                                    <td>string</td>
+                                    <td>Insurance carrier's policy identifier</td>
+                                    <td>"G-30280-0"</td>
+                                </tr>
+                                <tr>
+                                    <td><code>policyNumber</code></td>
+                                    <td>string</td>
+                                    <td>Internal policy number</td>
+                                    <td>"GTL-130601-01"</td>
+                                </tr>
+                                <tr>
+                                    <td><code>productCode</code></td>
+                                    <td>string</td>
+                                    <td>Product type identifier</td>
+                                    <td>"GTL"</td>
+                                </tr>
+                                <tr>
+                                    <td><code>coverageAmount</code></td>
+                                    <td>string</td>
+                                    <td>Coverage amount (as string)</td>
+                                    <td>"50000"</td>
+                                </tr>
+                                <tr>
+                                    <td><code>riders</code></td>
+                                    <td>array</td>
+                                    <td>Array of policy rider objects</td>
+                                    <td>See Riders Structure</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h4>Riders Structure</h4>
+                        <div class="code-example">
+                            <div class="code-header">
+                                <span>Rider Object Example</span>
+                            </div>
+                            <div class="code-content">
+                                <pre><code class="language-json">{
+  "riderName": "CHRONIC ILLNESS RIDER",
+  "riderCode": "CIR", 
+  "coverageAmount": "0"
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="error-codes" class="api-section">
+                    <h2>Error Handling</h2>
+                    <p>Complete reference for HTTP status codes and error responses.</p>
+
+                    <h3>HTTP Status Codes</h3>
+                    <table class="params-table">
+                        <thead>
+                            <tr>
+                                <th>Status Code</th>
+                                <th>Meaning</th>
+                                <th>Common Cause</th>
+                                <th>Recommended Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>200</code></td>
+                                <td>OK</td>
+                                <td>Request successful</td>
+                                <td>Process response data normally</td>
+                            </tr>
+                            <tr>
+                                <td><code>400</code></td>
+                                <td>Bad Request</td>
+                                <td>Invalid JSON or missing required fields</td>
+                                <td>Validate request format and required parameters</td>
+                            </tr>
+                            <tr>
+                                <td><code>401</code></td>
+                                <td>Unauthorized</td>
+                                <td>Invalid credentials or expired token</td>
+                                <td>Refresh authentication token or verify credentials</td>
+                            </tr>
+                            <tr>
+                                <td><code>403</code></td>
+                                <td>Forbidden</td>
+                                <td>IP address not whitelisted</td>
+                                <td>Contact administrator for IP approval</td>
+                            </tr>
+                            <tr>
+                                <td><code>404</code></td>
+                                <td>Not Found</td>
+                                <td>Incorrect endpoint URL</td>
+                                <td>Verify endpoint path and environment</td>
+                            </tr>
+                            <tr>
+                                <td><code>429</code></td>
+                                <td>Too Many Requests</td>
+                                <td>Rate limit exceeded</td>
+                                <td>Implement request throttling and retry logic</td>
+                            </tr>
+                            <tr>
+                                <td><code>500</code></td>
+                                <td>Internal Server Error</td>
+                                <td>Server-side processing error</td>
+                                <td>Retry after delay; contact support if persists</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section id="error-responses" class="api-section">
+                    <h3>Error Response Format</h3>
+                    <p>When errors occur, the API returns structured error information to help with debugging.</p>
+
+                    <div class="code-example">
+                        <div class="code-header">
+                            <span>Error Response Example</span>
+                        </div>
+                        <div class="code-content">
+                            <pre><code class="language-json">{
+  "error": {
+    "code": "INVALID_TOKEN",
+    "message": "The provided authentication token has expired or is invalid",
+    "details": "Token expired at 2024-03-15T10:30:00Z",
+    "timestamp": "2024-03-15T10:35:00Z"
+  }
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <h4>Error Object Fields</h4>
+                    <table class="params-table">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>code</code></td>
+                                <td>string</td>
+                                <td>Machine-readable error code</td>
+                            </tr>
+                            <tr>
+                                <td><code>message</code></td>
+                                <td>string</td>
+                                <td>Human-readable error description</td>
+                            </tr>
+                            <tr>
+                                <td><code>details</code></td>
+                                <td>string</td>
+                                <td>Additional context about the error</td>
+                            </tr>
+                            <tr>
+                                <td><code>timestamp</code></td>
+                                <td>string</td>
+                                <td>ISO 8601 timestamp when error occurred</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="scripts-hig.js"></script>
+</body>
+</html>
