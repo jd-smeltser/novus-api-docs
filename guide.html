@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integration Guide - Novus API Documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+            <a href="index.html" class="logo">
+                <div class="logo-icon">N</div>
+                <div class="logo-text">Novus API</div>
+            </a>
+            <nav class="header-nav">
+                <a href="index.html" class="nav-link">Overview</a>
+                <a href="guide.html" class="nav-link active">Integration Guide</a>
+                <a href="api-reference.html" class="nav-link">API Reference</a>
+                <a href="examples.html" class="nav-link">Examples</a>
+            </nav>
+            <a href="api-reference.html" class="cta-button">API Reference</a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-content">
+                <div class="nav-section">
+                    <div class="nav-section-title">Getting Started</div>
+                    <a href="#prerequisites" class="nav-item active">Prerequisites</a>
+                    <a href="#overview" class="nav-item">Overview</a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Make.com Setup</div>
+                    <a href="#http-modules" class="nav-item">HTTP Module Selection</a>
+                    <a href="#token-request" class="nav-item">Token Request Setup</a>
+                    <a href="#member-request" class="nav-item">Member Info Setup</a>
+                    <a href="#response-parsing" class="nav-item">Response Parsing</a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Advanced Topics</div>
+                    <a href="#token-management" class="nav-item">Token Management</a>
+                    <a href="#error-handling" class="nav-item">Error Handling</a>
+                    <a href="#best-practices" class="nav-item">Best Practices</a>
+                    <a href="#troubleshooting" class="nav-item">Troubleshooting</a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content">
+            <div class="content-wrapper">
+                <header class="page-header">
+                    <h1>Make.com Integration Guide</h1>
+                    <p>Step-by-step instructions for integrating the Novus API with Make.com HTTP modules, including token management, error handling, and best practices.</p>
+                </header>
+
+                <section id="prerequisites" class="api-section">
+                    <h2>Prerequisites</h2>
+                    <p>Before beginning your integration, ensure you have all required components and access.</p>
+
+                    <div class="info-box info-box-warning">
+                        <div class="info-icon">⚠️</div>
+                        <div class="info-content">
+                            <strong>IP Whitelisting Required:</strong> Your IP address must be whitelisted before you can access the Novus API. Contact your API administrator to request whitelisting.
+                        </div>
+                    </div>
+
+                    <h3>Required Access</h3>
+                    <div class="code-example">
+                        <div class="code-header">
+                            <span>Prerequisites Checklist</span>
+                        </div>
+                        <div class="code-content">
+                            <pre><code>✅ Make.com account with HTTP module access
+✅ Novus API credentials (Username and Password)
+✅ Whitelisted IP address for API access
+✅ Access to QA and/or Production environments
+✅ Understanding of JSON and API authentication</code></pre>
+                        </div>
+                    </div>
+
+                    <h3>Environment Information</h3>
+                    <table class="params-table">
+                        <thead>
+                            <tr>
+                                <th>Environment</th>
+                                <th>Purpose</th>
+                                <th>Base URL Pattern</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>QA</strong></td>
+                                <td>Development & Testing</td>
+                                <td><code>https://[CLIENT_URL]/[API_PATH]/WAEPANYL</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Production</strong></td>
+                                <td>Live Operations</td>
+                                <td><code>https://[CLIENT_URL]/[API_PATH]</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section id="overview" class="api-section">
+                    <h2>Integration Overview</h2>
+                    <p>The Novus API integration follows a two-step authentication process with specific considerations for Make.com workflows.</p>
+
+                    <div class="info-box info-box-info">
+                        <div class="info-icon">⏱️</div>
+                        <div class="info-content">
+                            <strong>Token Expiration:</strong> Authentication tokens expire after 5 minutes. This is critical for Make.com workflows that process multiple members or run for extended periods.
+                        </div>
+                    </div>
+
+                    <h3>Workflow Architecture</h3>
+                    <div class="code-example">
+                        <div class="code-header">
+                            <span>Basic Flow</span>
+                        </div>
+                        <div class="code-content">
+                            <pre><code>1. Request Authentication Token
+   ├── POST /WAEPANYL/Token
+   ├── Headers: UserName, Password
+   └── Response: Token (expires in 5 minutes)
+
+2. Retrieve Member Information  
+   ├── POST /WAEPANYL/GetMemberInfo
+   ├── Headers: UserName, Password, Token
+   ├── Body: Member identification data
+   └── Response: Member details and policies
+
+3. Process Response Data
+   ├── Parse JSON response
+   ├── Handle empty responses
+   └── Extract required information</code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="http-modules" class="api-section">
+                    <h2>HTTP Module Selection</h2>
+                    <p>The Novus API requires specific Make.com HTTP module configuration due to its custom authentication method.</p>
+
+                    <div class="info-box info-box-warning">
+                        <div class="info-icon">🎯</div>
+                        <div class="info-content">
+                            <strong>Important:</strong> You must use the generic "Make a request" action. The specialized authentication modules (Basic Auth, API Key, OAuth) are not compatible with Novus API's custom header authentication.
+                        </div>
+                    </div>
+
+                    <h3>Correct Module Selection</h3>
+                    <table class="params-table">
+                        <thead>
+                            <tr>
+                                <th>HTTP Action</th>
+                                <th>Compatible</th>
+                                <th>Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>Make a request</code></td>
+                                <td><span style="color: var(--color-success);">✅ YES</span></td>
+                                <td>Allows custom header configuration</td>
+                            </tr>
+                            <tr>
+                                <td><code>Make a Basic Auth request</code></td>
+                                <td><span style="color: var(--color-error);">❌ NO</span></td>
+                                <td>Uses HTTP Basic Auth (not Novus method)</td>
+                            </tr>
+                            <tr>
+                                <td><code>Make an API Key Auth request</code></td>
+                                <td><span style="color: var(--color-error);">❌ NO</span></td>
+                                <td>Different authentication pattern</td>
+                            </tr>
+                            <tr>
+                                <td><code>Make an OAuth 2.0 request</code></td>
+                                <td><span style="color: var(--color-error);">❌ NO</span></td>
+                                <td>Novus doesn't use OAuth 2.0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section id="token-request" class="api-section">
+                    <h2>Token Request Setup</h2>
+                    <p>Configure your first HTTP module to request an authentication token from the Novus API.</p>
+
+                    <h3>Module Configuration</h3>
+                    <div class="endpoint-section">
+                        <div class="endpoint-header">
+                            <span class="method method-post">HTTP MODULE</span>
+                            <span class="endpoint-path">Token Request Configuration</span>
+                        </div>
+                        
+                        <div class="tab-container">
+                            <div class="tab-buttons">
+                                <button class="tab-button active" onclick="showTab('token-config')">Configuration</button>
+                                <button class="tab-button" onclick="showTab('token-headers')">Headers</button>
+                                <button class="tab-button" onclick="showTab('token-testing')">Testing</button>
+                            </div>
+
+                            <div class="tab-content">
+                                <div id="token-config" class="tab-pane active">
+                                    <h4>Basic Settings</h4>
+                                    <table class="params-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Setting</th>
+                                                <th>Value</th>
+                                                <th>Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>URL</strong></td>
+                                                <td><code>https://[CLIENT_URL]/[API_PATH]/WAEPANYL/Token</code></td>
+                                                <td>Same for QA and Production</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Method</strong></td>
+                                                <td><code>POST</code></td>
+                                                <td>Required</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Body type</strong></td>
+                                                <td><code>Raw</code></td>
+                                                <td>Leave body empty</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Content type</strong></td>
+                                                <td><code>application/json</code></td>
+                                                <td>Standard JSON content type</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div id="token-headers" class="tab-pane">
+                                    <h4>Required Headers</h4>
+                                    <p>Add the following headers to your HTTP module:</p>
+                                    
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>Header Configuration</span>
+                                            <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                                        </div>
+                                        <div class="code-content">
+                                            <pre><code>Header 1:
+Name: UserName
+Value: [YOUR_USERNAME]
+
+Header 2:
+Name: Password  
+Value: [YOUR_PASSWORD]</code></pre>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-box info-box-info">
+                                        <div class="info-icon">💡</div>
+                                        <div class="info-content">
+                                            <strong>Tip:</strong> Store credentials in Make.com Data Stores or environment variables instead of hardcoding them in your scenario.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="token-testing" class="tab-pane">
+                                    <h4>Testing Your Configuration</h4>
+                                    <ol>
+                                        <li>Save your HTTP module configuration</li>
+                                        <li>Run the module manually to test the connection</li>
+                                        <li>Verify you receive a token in the response</li>
+                                        <li>Check that the token is properly formatted (JWT-style)</li>
+                                    </ol>
+
+                                    <h4>Expected Response</h4>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>Successful Token Response</span>
+                                        </div>
+                                        <div class="code-content">
+                                            <pre><code class="language-json">{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires_in": 300,
+  "token_type": "Bearer"
+}</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="member-request" class="api-section">
+                    <h2>Member Info Request Setup</h2>
+                    <p>Configure your second HTTP module to retrieve member information using the authentication token.</p>
+
+                    <div class="info-box info-box-warning">
+                        <div class="info-icon">⚠️</div>
+                        <div class="info-content">
+                            <strong>Production Difference:</strong> The production GetMemberInfo endpoint does not include <code>/WAEPANYL/</code> in the path.
+                        </div>
+                    </div>
+
+                    <h3>Module Configuration</h3>
+                    <div class="endpoint-section">
+                        <div class="endpoint-header">
+                            <span class="method method-post">HTTP MODULE</span>
+                            <span class="endpoint-path">Member Info Request Configuration</span>
+                        </div>
+                        
+                        <div class="tab-container">
+                            <div class="tab-buttons">
+                                <button class="tab-button active" onclick="showTab('member-config')">Configuration</button>
+                                <button class="tab-button" onclick="showTab('member-headers')">Headers</button>
+                                <button class="tab-button" onclick="showTab('member-body')">Request Body</button>
+                            </div>
+
+                            <div class="tab-content">
+                                <div id="member-config" class="tab-pane active">
+                                    <h4>Environment-Specific URLs</h4>
+                                    <table class="params-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Environment</th>
+                                                <th>URL</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>QA</strong></td>
+                                                <td><code>https://[CLIENT_URL]/[API_PATH]/WAEPANYL/GetMemberInfo</code></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Production</strong></td>
+                                                <td><code>https://[CLIENT_URL]/[API_PATH]/GetMemberInfo</code></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <h4>Other Settings</h4>
+                                    <table class="params-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Setting</th>
+                                                <th>Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>Method</strong></td>
+                                                <td><code>POST</code></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Body type</strong></td>
+                                                <td><code>Raw</code></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Content type</strong></td>
+                                                <td><code>application/json</code></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div id="member-headers" class="tab-pane">
+                                    <h4>Required Headers</h4>
+                                    <p>Include all three headers for member information requests:</p>
+                                    
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>Member Request Headers</span>
+                                            <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                                        </div>
+                                        <div class="code-content">
+                                            <pre><code>Header 1:
+Name: UserName
+Value: [YOUR_USERNAME]
+
+Header 2:
+Name: Password
+Value: [YOUR_PASSWORD]
+
+Header 3:
+Name: Token
+Value: {{token_from_previous_module}}</code></pre>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-box info-box-info">
+                                        <div class="info-icon">🔗</div>
+                                        <div class="info-content">
+                                            <strong>Token Mapping:</strong> Map the token value from your previous HTTP module's response. In Make.com, this will look like <code>{{1.data.token}}</code> or similar.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="member-body" class="tab-pane">
+                                    <h4>Request Body Format</h4>
+                                    <div class="code-example">
+                                        <div class="code-header">
+                                            <span>JSON Request Body</span>
+                                            <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                                        </div>
+                                        <div class="code-content">
+                                            <pre><code class="language-json">{
+  "MembershipID": "{{membershipId}}",
+  "MemberSSN": "{{memberSSN}}",
+  "DateOfBirth": "{{dateOfBirth}}",
+  "FirstName": "{{firstName}}",
+  "LastName": "{{lastName}}"
+}</code></pre>
+                                        </div>
+                                    </div>
+
+                                    <h4>Field Requirements</h4>
+                                    <table class="params-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Field</th>
+                                                <th>Format</th>
+                                                <th>Example</th>
+                                                <th>Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><code>MembershipID</code></td>
+                                                <td>String</td>
+                                                <td><code>"123456"</code></td>
+                                                <td>Exact member ID</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code>MemberSSN</code></td>
+                                                <td>String</td>
+                                                <td><code>"123-45-6789"</code></td>
+                                                <td>Include dashes</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code>DateOfBirth</code></td>
+                                                <td>YYYY-MM-DD</td>
+                                                <td><code>"1990-01-15"</code></td>
+                                                <td>ISO date format</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code>FirstName</code></td>
+                                                <td>String</td>
+                                                <td><code>"Jane"</code></td>
+                                                <td>Exact spelling</td>
+                                            </tr>
+                                            <tr>
+                                                <td><code>LastName</code></td>
+                                                <td>String</td>
+                                                <td><code>"Doe"</code></td>
+                                                <td>Exact spelling</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="response-parsing" class="api-section">
+                    <h2>Response Parsing</h2>
+                    <p>Configure JSON parsing and response handling for the API responses.</p>
+
+                    <h3>Add JSON Parse Modules</h3>
+                    <ol>
+                        <li><strong>After Token Request:</strong> Add a "JSON > Parse JSON" module to extract the token</li>
+                        <li><strong>After Member Request:</strong> Add another "JSON > Parse JSON" module to process member data</li>
+                    </ol>
+
+                    <h3>Response Handling Strategies</h3>
+                    <div class="tab-container">
+                        <div class="tab-buttons">
+                            <button class="tab-button active" onclick="showTab('success-response')">Success Response</button>
+                            <button class="tab-button" onclick="showTab('empty-response')">Empty Response</button>
+                            <button class="tab-button" onclick="showTab('error-response')">Error Response</button>
+                        </div>
+
+                        <div class="tab-content">
+                            <div id="success-response" class="tab-pane active">
+                                <h4>Processing Successful Responses</h4>
+                                <p>When the API returns member data, you'll receive an array of covered persons:</p>
+
+                                <div class="code-example">
+                                    <div class="code-header">
+                                        <span>Typical Success Response Structure</span>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code class="language-json">[
+  {
+    "coveredPersonType": "Member",
+    "demographics": { /* member details */ },
+    "Products": [ /* policy information */ ]
+  },
+  {
+    "coveredPersonType": "Spouse", 
+    "demographics": null,
+    "Products": null
+  }
+]</code></pre>
+                                    </div>
+                                </div>
+
+                                <h4>Make.com Processing</h4>
+                                <ol>
+                                    <li>Use <strong>Iterator</strong> module to process each person in the array</li>
+                                    <li>Use <strong>Router</strong> to handle different person types (Member, Spouse)</li>
+                                    <li>Use <strong>Filter</strong> to process only records with data</li>
+                                </ol>
+                            </div>
+
+                            <div id="empty-response" class="tab-pane">
+                                <h4>Handling Empty Responses</h4>
+                                <p>The API returns an empty array <code>[]</code> in these scenarios:</p>
+
+                                <ul>
+                                    <li><strong>No Record Found:</strong> Member doesn't exist in the system</li>
+                                    <li><strong>Multiple Records:</strong> Ambiguous match (multiple members with same data)</li>
+                                </ul>
+
+                                <div class="info-box info-box-warning">
+                                    <div class="info-icon">⚠️</div>
+                                    <div class="info-content">
+                                        <strong>Important:</strong> Empty responses are normal and must be handled gracefully in your workflow.
+                                    </div>
+                                </div>
+
+                                <h4>Make.com Handling</h4>
+                                <div class="code-example">
+                                    <div class="code-header">
+                                        <span>Empty Response Check</span>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code class="language-javascript">// In a Filter or Router module
+{{if(length(response) > 0; "has_data"; "no_data")}}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="error-response" class="tab-pane">
+                                <h4>Error Response Handling</h4>
+                                <p>Handle various error scenarios with appropriate Make.com error handlers:</p>
+
+                                <table class="params-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Status Code</th>
+                                            <th>Scenario</th>
+                                            <th>Make.com Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>401</code></td>
+                                            <td>Expired token</td>
+                                            <td>Refresh token and retry</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>403</code></td>
+                                            <td>IP not whitelisted</td>
+                                            <td>Send alert notification</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>500</code></td>
+                                            <td>Server error</td>
+                                            <td>Retry after delay</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="token-management" class="api-section">
+                    <h2>Token Management</h2>
+                    <p>Implement smart token management to handle the 5-minute expiration efficiently.</p>
+
+                    <div class="info-box info-box-error">
+                        <div class="info-icon">⏱️</div>
+                        <div class="info-content">
+                            <strong>Critical:</strong> Tokens expire after 5 minutes. For workflows processing multiple members or running longer than 5 minutes, you must implement token refresh logic.
+                        </div>
+                    </div>
+
+                    <h3>Token Management Strategies</h3>
+                    <div class="tab-container">
+                        <div class="tab-buttons">
+                            <button class="tab-button active" onclick="showTab('fresh-token')">Fresh Token Per Request</button>
+                            <button class="tab-button" onclick="showTab('token-caching')">Smart Token Caching</button>
+                            <button class="tab-button" onclick="showTab('auto-refresh')">Automatic Refresh</button>
+                        </div>
+
+                        <div class="tab-content">
+                            <div id="fresh-token" class="tab-pane active">
+                                <h4>Strategy 1: Fresh Token Per Request</h4>
+                                <p><strong>Best for:</strong> Simple workflows, single member lookups</p>
+
+                                <div class="code-example">
+                                    <div class="code-header">
+                                        <span>Workflow Structure</span>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code>For each member:
+1. HTTP: Request Token
+2. JSON: Parse Token  
+3. HTTP: Get Member Info (use fresh token)
+4. JSON: Parse Member Response
+5. Process member data</code></pre>
+                                    </div>
+                                </div>
+
+                                <p><strong>Pros:</strong> Simple, always works<br>
+                                <strong>Cons:</strong> More API calls, slower performance</p>
+                            </div>
+
+                            <div id="token-caching" class="tab-pane">
+                                <h4>Strategy 2: Smart Token Caching</h4>
+                                <p><strong>Best for:</strong> Multiple member processing, batch operations</p>
+
+                                <div class="code-example">
+                                    <div class="code-header">
+                                        <span>Token Caching Logic</span>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code class="language-javascript">// Check if cached token is still valid (4-minute buffer)
+{{if(and(
+  length(get("cached_token")) > 0;
+  ((formatDate(now; "X")) - get("token_timestamp")) < 240
+); "use_cached"; "get_new")}}</code></pre>
+                                    </div>
+                                </div>
+
+                                <h4>Implementation Steps:</h4>
+                                <ol>
+                                    <li><strong>Check Cache:</strong> Use "Get Variable" to check for existing token</li>
+                                    <li><strong>Validate Age:</strong> Use "Switch" to check if token is < 4 minutes old</li>
+                                    <li><strong>Use or Refresh:</strong> Route to either use cached token or get new one</li>
+                                    <li><strong>Store Token:</strong> Use "Set Variable" to cache new tokens with timestamp</li>
+                                </ol>
+                            </div>
+
+                            <div id="auto-refresh" class="tab-pane">
+                                <h4>Strategy 3: Automatic Refresh on Error</h4>
+                                <p><strong>Best for:</strong> Long-running workflows, high reliability needed</p>
+
+                                <div class="code-example">
+                                    <div class="code-header">
+                                        <span>Error Handler Configuration</span>
+                                    </div>
+                                    <div class="code-content">
+                                        <pre><code>Member Info HTTP Module:
+1. Add Error Handler
+2. Filter: Status Code = 401
+3. HTTP: Get New Token
+4. Set Variable: Update cached token
+5. Resume: Retry original request</code></pre>
+                                    </div>
+                                </div>
+
+                                <p>This approach automatically recovers from token expiration without manual intervention.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="error-handling" class="api-section">
+                    <h2>Error Handling</h2>
+                    <p>Implement comprehensive error handling for robust Make.com workflows.</p>
+
+                    <h3>Common Error Scenarios</h3>
+                    <div class="environment-cards">
+                        <div class="environment-card">
+                            <div class="env-header">
+                                <h3>Authentication Errors</h3>
+                                <span class="status-badge status-deprecated">401/403</span>
+                            </div>
+                            <div class="env-content">
+                                <p><strong>Causes:</strong> Invalid credentials, expired token, IP not whitelisted</p>
+                                <p><strong>Solution:</strong> Add error handlers to refresh tokens and send alerts</p>
+                            </div>
+                        </div>
+
+                        <div class="environment-card">
+                            <div class="env-header">
+                                <h3>Data Issues</h3>
+                                <span class="status-badge status-warning">Empty Response</span>
+                            </div>
+                            <div class="env-content">
+                                <p><strong>Causes:</strong> Member not found, multiple matches, invalid data</p>
+                                <p><strong>Solution:</strong> Use filters and routers to handle empty responses gracefully</p>
+                            </div>
+                        </div>
+
+                        <div class="environment-card">
+                            <div class="env-header">
+                                <h3>Network Issues</h3>
+                                <span class="status-badge status-deprecated">Timeout/500</span>
+                            </div>
+                            <div class="env-content">
+                                <p><strong>Causes:</strong> Server errors, network timeouts, service unavailable</p>
+                                <p><strong>Solution:</strong> Implement retry logic with exponential backoff</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Error Handler Implementation</h3>
+                    <div class="code-example">
+                        <div class="code-header">
+                            <span>HTTP Module Error Handler Setup</span>
+                        </div>
+                        <div class="code-content">
+                            <pre><code>1. Right-click HTTP module → "Add error handler"
+2. Add "HTTP Status Code" filter
+3. Configure handling based on error type:
+   - 401: Refresh token and retry
+   - 403: Send notification about IP restriction  
+   - 500: Wait and retry (max 3 attempts)
+   - Other: Log error and continue</code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="best-practices" class="api-section">
+                    <h2>Best Practices</h2>
+                    <p>Follow these recommendations for production-ready Make.com integrations.</p>
+
+                    <h3>Security & Credentials</h3>
+                    <ul>
+                        <li><strong>Use Data Stores:</strong> Store API credentials in Make.com Data Stores, not hardcoded in scenarios</li>
+                        <li><strong>Environment Variables:</strong> Use different credentials for QA vs Production</li>
+                        <li><strong>IP Monitoring:</strong> Monitor for IP changes that might affect whitelisting</li>
+                        <li><strong>Credential Rotation:</strong> Plan for regular credential updates</li>
+                    </ul>
+
+                    <h3>Performance Optimization</h3>
+                    <ul>
+                        <li><strong>Token Caching:</strong> Implement smart token caching to reduce API calls</li>
+                        <li><strong>Batch Processing:</strong> Process multiple members with same token when possible</li>
+                        <li><strong>Parallel Processing:</strong> Use Router for independent operations</li>
+                        <li><strong>Rate Limiting:</strong> Add delays between requests if processing large volumes</li>
+                    </ul>
+
+                    <h3>Monitoring & Logging</h3>
+                    <div class="code-example">
+                        <div class="code-header">
+                            <span>Logging Implementation</span>
+                        </div>
+                        <div class="code-content">
+                            <pre><code>Add logging modules to track:
+✅ API request/response times
+✅ Token refresh events  
+✅ Error occurrences and types
+✅ Empty response rates
+✅ Daily usage statistics</code></pre>
+                        </div>
+                    </div>
+
+                    <h3>Data Validation</h3>
+                    <ul>
+                        <li><strong>Input Validation:</strong> Validate member data format before API calls</li>
+                        <li><strong>Date Formatting:</strong> Ensure dates are in YYYY-MM-DD format</li>
+                        <li><strong>SSN Formatting:</strong> Include dashes in SSN format</li>
+                        <li><strong>Name Accuracy:</strong> Verify exact spelling of names</li>
+                    </ul>
+                </section>
+
+                <section id="troubleshooting" class="api-section">
+                    <h2>Troubleshooting</h2>
+                    <p>Common issues and their solutions for Make.com + Novus API integration.</p>
+
+                    <h3>Quick Diagnostic Checklist</h3>
+                    <div class="code-example">
+                        <div class="code-header">
+                            <span>Before Contacting Support</span>
+                        </div>
+                        <div class="code-content">
+                            <pre><code>✅ Verify API credentials are correct
+✅ Check IP address is whitelisted  
+✅ Confirm using correct environment URLs
+✅ Test token generation manually
+✅ Validate request body JSON format
+✅ Check Make.com scenario execution history
+✅ Review error logs for specific error codes</code></pre>
+                        </div>
+                    </div>
+
+                    <h3>Common Issues</h3>
+                    <table class="params-table">
+                        <thead>
+                            <tr>
+                                <th>Issue</th>
+                                <th>Symptoms</th>
+                                <th>Solution</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Token expires too quickly</strong></td>
+                                <td>401 errors during batch processing</td>
+                                <td>Implement token caching with 4-minute refresh</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Empty responses for valid members</strong></td>
+                                <td>API returns [] for known members</td>
+                                <td>Check data accuracy, try partial matches</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Connection timeouts</strong></td>
+                                <td>Requests fail after 40+ seconds</td>
+                                <td>Increase timeout settings, check network</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Wrong endpoint URL</strong></td>
+                                <td>404 errors on API calls</td>
+                                <td>Verify QA vs Prod URL differences</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Getting Help</h3>
+                    <div class="info-box info-box-info">
+                        <div class="info-icon">🆘</div>
+                        <div class="info-content">
+                            <strong>Support Escalation:</strong>
+                            <ol style="margin-top: 0.5rem;">
+                                <li>Check this documentation and troubleshooting guide</li>
+                                <li>Review Make.com HTTP module documentation</li>
+                                <li>Contact Novus API support with detailed error information</li>
+                                <li>Engage Make.com support for platform-specific issues</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>
